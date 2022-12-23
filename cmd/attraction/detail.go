@@ -39,4 +39,8 @@ type Detail struct {
 
 	// 2D coordinate longitutde, example "-0.00145"
 	Longitude float64 `json:"longitude"`
+
+	// Image name to be used for testing purposes.
+	// The image will be stored on the client.
+	ImageName string `json:"imageName"`
 }
