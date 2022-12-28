@@ -13,5 +13,5 @@ vet: fmt
 .PHONY:vet
 
 build: vet 
-	go build ./cmd/main.go
+	go build ./src/main.go
 .PHONY:build 
