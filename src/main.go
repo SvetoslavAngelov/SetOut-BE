@@ -2,28 +2,31 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
+
+	"github.com/SvetoslavAngelov/tourplan-app/src/attraction"
+	"github.com/go-chi/chi/v5"
 )
 
-type Attraction struct {
-	Id       int     `json:"id"`
-	Name     string  `json:"name"`
-	IsOpen   bool    `json:"isopen"`
-	Distance float32 `json:"distance"`
-	Rating   float32 `json:"rating"`
+var attractions = []attraction.Outline{
+	{Id: 1,
+		Name:      "MyfirstAttr",
+		IsOpen:    false,
+		Distance:  2.64,
+		Rating:    4.7,
+		Latitude:  -0.000536,
+		Longitude: 51.476833,
+		ImageName: "default"},
 }
 
-var attractions = []Attraction{
-	{Id: 1, Name: "MyfirstAttr", IsOpen: false, Distance: 21.5, Rating: 4.9},
-}
-
-func attraction(wr http.ResponseWriter, req *http.Request) {
+func getAttraction(wr http.ResponseWriter, req *http.Request) {
 	wr.Header().Set("Content-Type", "application/json")
 	id, _ := strconv.Atoi(chi.URLParam(req, "id"))
 	for _, attr := range attractions {
-		if attr.Id == id {
+
+		// Casting down to int32, unlikely to max it out.
+		if attr.Id == int32(id) {
 			json.NewEncoder(wr).Encode(attr)
 			return
 		}
@@ -37,7 +40,7 @@ func attraction(wr http.ResponseWriter, req *http.Request) {
 
 func main() {
 	router := chi.NewRouter()
-	router.Get("/attraction/{id:[0-9]+}", attraction)
+	router.Get("/attraction/{id:[0-9]+}", getAttraction)
 
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {
