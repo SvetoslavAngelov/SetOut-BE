@@ -1,0 +1,99 @@
+swagger: '2.0'
+info: 
+  title: SetOut API
+  description: SetOut API on Google Cloud Endpoints with an App Engine backend 
+  version: 1.0.2 
+host: gateway
+schemes:
+  - https 
+produces:
+  - application/json
+x-google-backend: 
+  address: https://
+  jwt_audience: JWT Audience Code
+  protocol: h2
+
+paths: 
+
+  /attractions/{id}:
+    get: 
+      summary: Get a tourist attraction
+      operationId: GetAttractionById
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          type: integer
+          format: int32
+          description: The ID of the attraction to return 
+      responses:
+        200: 
+          description: Successful response
+          schema: 
+            type: object
+            properties: 
+              id: 
+                type: integer
+                format: int32
+              name: 
+                type: string
+              isOpen:
+                type: boolean
+              distance: 
+                type: number
+                format: float 
+              rating:
+                type: number
+                format: float
+              latitude: 
+                type: number
+                format: float
+              longitude: 
+                type: number
+                format: float
+              imageName: 
+                type: string
+        400:
+          description: The specified attraction ID is not valid (not a number).
+        404:
+          description: An attraction with the specified ID was not found. 
+        default:
+          description: Unexpected error
+          
+  /attractions/:
+    get: 
+      summary: Get a list of tourist attractions
+      operationId: GetAttractionsList
+      responses:
+        200: 
+          description: Successful response
+          schema:
+            type: array
+            items: 
+              type: object
+              properties: 
+                id: 
+                  type: integer
+                  format: int32
+                name: 
+                  type: string
+                isOpen:
+                  type: boolean
+                distance: 
+                  type: number
+                  format: float 
+                rating:
+                  type: number
+                  format: float
+                latitude: 
+                  type: number
+                  format: float
+                longitude: 
+                  type: number
+                  format: float
+                imageName: 
+                  type: string
+        404:
+          description: No attractions found. 
+        default:
+          description: Unexpected error
