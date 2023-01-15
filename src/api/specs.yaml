@@ -60,7 +60,7 @@ paths:
         default:
           description: Unexpected error
           
-  /attractions/:
+  /attractions:
     get: 
       summary: Get a list of tourist attractions
       operationId: GetAttractionsList
