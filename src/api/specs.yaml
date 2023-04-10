@@ -2,15 +2,15 @@ swagger: '2.0'
 info: 
   title: SetOut API
   description: SetOut API on Google Cloud Endpoints with an App Engine backend 
-  version: 1.0.2 
-host: gateway
+  version: 1.0.3 
+host: ${GCPGateway}
 schemes:
   - https 
 produces:
   - application/json
 x-google-backend: 
-  address: https://
-  jwt_audience: JWT Audience Code
+  address: ${GCPBackend}
+  jwt_audience: ${GCPJWT}
   protocol: h2
 
 paths: 
@@ -60,7 +60,7 @@ paths:
         default:
           description: Unexpected error
           
-  /attractions/:
+  /attractions:
     get: 
       summary: Get a list of tourist attractions
       operationId: GetAttractionsList
