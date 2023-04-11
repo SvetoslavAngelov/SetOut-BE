@@ -7,51 +7,33 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-// Helper class to manage AuraDB resources
-type AuraDbHandler struct {
-	driver neo4j.Driver
-}
+// A collection of helper functions to retrieve data from AuraDB
 
-// Create new AuraDB handler
-func NewAuraDbHandler(uri, username, password string) (*AuraDbHandler, error) {
-	auth := neo4j.BasicAuth(username, password, "")
-	driver, err := neo4j.NewDriverWithContext(uri, auth)
-	if err != nil {
-		return nil, err
-	}
+// Retrieve a single tourist attraction node, given an ID.
+func ReadAttractionById(session neo4j.SessionWithContext, id int32) (attraction.Outline, error) {
 
-	return &AuraDbHandler{driver: driver}, nil
-}
-
-func (a *AuraDbHandler) Close(ctx context.Context) {
-	a.driver.Close(ctx)
-}
-
-func (a *AuraDbHandler) ReadLocationsById(locationId int) error {
 	ctx := context.Background()
-	session := a.driver.NewSession(ctx, neo4j.SessionConfig{DatabaseName: "RouteData"})
-	defer session.Close(ctx)
+	location := attraction.MakeOutline()
 
-	location, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (interface{}, error) {
+	_, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		readLocationById := `
 				MATCH (a: Attractions)
-				WHERE id(a) = $locationId
+				WHERE a.id = $id
 				return a
 			`
-		result, err := tx.Run(ctx, readLocationById, map[string]interface{}{
-			"locationId": locationId,
+		result, err := tx.Run(ctx, readLocationById, map[string]any{
+			"locationId": id,
 		})
 
+		// Return an empty object if the query fails.
 		if err != nil {
-			return attraction.Outline{}, result.Err()
+			return location, result.Err()
 		}
-
-		location := attraction.MakeOutline()
 
 		if result.Next(ctx) {
 			record := result.Record()
 			locationNode := record.Values[0].(neo4j.Node)
-			location.Id = locationNode.Id
+			//location.Id = locationNode.Id
 			location.Name = locationNode.Props["name"].(string)
 			location.Rating = locationNode.Props["rating"].(float32)
 			location.Latitude = locationNode.Props["latitude"].(float64)
@@ -63,8 +45,8 @@ func (a *AuraDbHandler) ReadLocationsById(locationId int) error {
 	})
 
 	if err != nil {
-		return attraction.MakeOutline(), err
+		return location, err
 	}
 
-	return location, err
+	return location, nil
 }
