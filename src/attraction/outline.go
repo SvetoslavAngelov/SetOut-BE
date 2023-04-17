@@ -38,3 +38,17 @@ type Outline struct {
 	// The image will be stored on the client.
 	ImageName string `json:"imageName"`
 }
+
+// Default empty constructor
+func MakeOutline() Outline {
+	return Outline{
+		Id:        0,
+		Name:      "Empty",
+		IsOpen:    false,
+		Distance:  0.0,
+		Rating:    0.0,
+		Latitude:  0.0,
+		Longitude: 0.0,
+		ImageName: "imageName",
+	}
+}
