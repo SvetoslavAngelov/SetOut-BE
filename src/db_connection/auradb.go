@@ -9,7 +9,7 @@ import (
 
 // A collection of helper functions to retrieve data from AuraDB
 
-// Retrieve a single tourist attraction node, given an ID.
+// Retrieve a single tourist attraction node, given an AuraDB session and an attraction ID.
 func ReadAttractionById(session neo4j.SessionWithContext, id int32) (attraction.Outline, error) {
 
 	ctx := context.Background()
@@ -33,7 +33,7 @@ func ReadAttractionById(session neo4j.SessionWithContext, id int32) (attraction.
 		if result.Next(ctx) {
 			record := result.Record()
 			locationNode := record.Values[0].(neo4j.Node)
-			//location.Id = locationNode.Id
+			location.Id = locationNode.Props["id"].(int32)
 			location.Name = locationNode.Props["name"].(string)
 			location.Rating = locationNode.Props["rating"].(float32)
 			location.Latitude = locationNode.Props["latitude"].(float64)
