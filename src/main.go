@@ -19,18 +19,21 @@ func main() {
 	driver, db_err := neo4j.NewDriverWithContext(uri, auth)
 
 	if db_err != nil {
-		println("Couldn't create a new database connection, with an error, ", db_err)
+		println("Couldn't create a new driver, with an error, ", db_err)
 	}
 
 	ctx := context.Background()
-	defer driver.Close(ctx)
+	c_err := driver.VerifyConnectivity(ctx)
 
-	session := driver.NewSession(ctx, neo4j.SessionConfig{DatabaseName: "RouteData"})
-	defer session.Close(ctx)
+	if c_err != nil {
+		println("Couldn't create a new database connection, with an error, ", c_err)
+	}
+
+	defer driver.Close(ctx)
 
 	// Create a new Router interface
 	router := chi.NewRouter()
-	router.Use(routes.Neo4jSessionMiddleware(session))
+	router.Use(routes.Neo4jDriverMiddleware(driver))
 
 	router.Route("/", func(r chi.Router) {
 		r.Get("/attractions/{id:[0-9]+}", routes.GetAttractionById)
