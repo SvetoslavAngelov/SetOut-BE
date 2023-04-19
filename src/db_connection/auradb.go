@@ -7,7 +7,9 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-// A collection of helper functions to retrieve data from AuraDB
+/*
+	A collection of helper functions to retrieve data from AuraDB
+*/
 
 // Retrieve a single tourist attraction node, given an AuraDB session and an attraction ID.
 func ReadAttractionById(session neo4j.SessionWithContext, id int32) (attraction.Outline, error) {
