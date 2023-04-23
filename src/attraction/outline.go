@@ -10,7 +10,7 @@ type Outline struct {
 	*/
 
 	// The ID can be a simple int, which can start from 1.
-	Id int32 `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
 
 	// The name of the tourist attraction, example "Cutty Sark".
 	Name string `json:"name"`
@@ -23,10 +23,10 @@ type Outline struct {
 	// The distance between the client's current location and
 	// this tourist attraction. This can be determined when the
 	// client requests this object.
-	Distance float32 `json:"distance"`
+	Distance float64 `json:"distance"`
 
 	// Apple Maps rating, if applicable, example "4.5".
-	Rating float32 `json:"rating"`
+	Rating float64 `json:"rating"`
 
 	// 2D coordinate latitude, example "51.48286"
 	Latitude float64 `json:"latitude"`

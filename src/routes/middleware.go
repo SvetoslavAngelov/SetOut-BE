@@ -21,7 +21,7 @@ func Neo4jDriverMiddleware(driver neo4j.DriverWithContext) func(http.Handler) ht
 	}
 }
 
-func respondToError(w http.ResponseWriter, status int, err error) {
+func respondWithError(w http.ResponseWriter, status int, err error) {
 	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
