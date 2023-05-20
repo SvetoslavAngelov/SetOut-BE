@@ -7,46 +7,88 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-// A collection of helper functions to retrieve data from AuraDB
+/*
+	A collection of helper functions to retrieve data from AuraDB
+*/
 
-// Retrieve a single tourist attraction node, given an ID.
-func ReadAttractionById(session neo4j.SessionWithContext, id int32) (attraction.Outline, error) {
+// Retrieve a single tourist attraction node, given an AuraDB session and an attraction ID.
+func ReadAttractionById(ctx context.Context, session neo4j.SessionWithContext, id int) (attraction.Outline, error) {
 
-	ctx := context.Background()
-	location := attraction.MakeOutline()
+	result, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 
-	_, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		readLocationById := `
+		attractionNode := attraction.MakeOutline()
+
+		txQuery := `
 				MATCH (a: Attractions)
 				WHERE a.id = $id
-				return a
+				RETURN a
 			`
-		result, err := tx.Run(ctx, readLocationById, map[string]any{
-			"locationId": id,
+		result, err := tx.Run(ctx, txQuery, map[string]any{
+			"id": id,
 		})
 
 		// Return an empty object if the query fails.
 		if err != nil {
-			return location, result.Err()
+			return attractionNode, err
 		}
 
 		if result.Next(ctx) {
-			record := result.Record()
-			locationNode := record.Values[0].(neo4j.Node)
-			//location.Id = locationNode.Id
-			location.Name = locationNode.Props["name"].(string)
-			location.Rating = locationNode.Props["rating"].(float32)
-			location.Latitude = locationNode.Props["latitude"].(float64)
-			location.Longitude = locationNode.Props["longitude"].(float64)
-			location.ImageName = locationNode.Props["attractionImageName"].(string)
+			node := result.Record().Values[0].(neo4j.Node)
+			attractionNode.Id = node.Props["id"].(int64)
+			attractionNode.Name = node.Props["name"].(string)
+			attractionNode.Rating = node.Props["rating"].(float64)
+			attractionNode.Latitude = node.Props["latitude"].(float64)
+			attractionNode.Longitude = node.Props["longitude"].(float64)
+			attractionNode.ImageName = node.Props["attractionImageName"].(string)
 		}
 
-		return location, result.Err()
+		return attractionNode, nil
 	})
 
 	if err != nil {
-		return location, err
+		return attraction.MakeOutline(), err
 	}
 
-	return location, nil
+	return result.(attraction.Outline), nil
+}
+
+// Retrieve all attraction nodes.
+// TODO, a good idea would be to limit the number of nodes to something reasonable, like 5
+func ReadAttractions(ctx context.Context, session neo4j.SessionWithContext) ([]attraction.Outline, error) {
+	result, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+
+		attractionList := []attraction.Outline{}
+
+		txQuery := `
+				MATCH (a: Attractions)
+				RETURN a
+			`
+		result, err := tx.Run(ctx, txQuery, nil)
+
+		// Return an empty list of objects
+		if err != nil {
+			return attractionList, err
+		}
+
+		for result.Next(ctx) {
+			node := result.Record().Values[0].(neo4j.Node)
+			attractionNode := attraction.MakeOutline()
+			attractionNode.Id = node.Props["id"].(int64)
+			attractionNode.Name = node.Props["name"].(string)
+			attractionNode.Rating = node.Props["rating"].(float64)
+			attractionNode.Latitude = node.Props["latitude"].(float64)
+			attractionNode.Longitude = node.Props["longitude"].(float64)
+			attractionNode.ImageName = node.Props["attractionImageName"].(string)
+
+			attractionList = append(attractionList, attractionNode)
+		}
+
+		return attractionList, nil
+	})
+
+	if err != nil {
+		return []attraction.Outline{}, err
+	}
+
+	return result.([]attraction.Outline), nil
 }

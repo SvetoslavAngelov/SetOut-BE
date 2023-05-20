@@ -1,14 +1,39 @@
 package main
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/SvetoslavAngelov/tourplan-app/src/db_connection"
 	"github.com/SvetoslavAngelov/tourplan-app/src/routes"
 	"github.com/go-chi/chi/v5"
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 func main() {
+
+	// Create a new a AuraDB driver & session
+	uri := db_connection.AuraDbUri()
+	auth := db_connection.AuraDbAuthToken()
+
+	driver, db_err := neo4j.NewDriverWithContext(uri, auth)
+
+	if db_err != nil {
+		println("Couldn't create a new driver, with an error, ", db_err)
+	}
+
+	ctx := context.Background()
+	c_err := driver.VerifyConnectivity(ctx)
+
+	if c_err != nil {
+		println("Couldn't create a new database connection, with an error, ", c_err)
+	}
+
+	defer driver.Close(ctx)
+
+	// Create a new Router interface
 	router := chi.NewRouter()
+	router.Use(routes.Neo4jDriverMiddleware(driver))
 
 	router.Route("/", func(r chi.Router) {
 		r.Get("/attractions/{id:[0-9]+}", routes.GetAttractionById)
